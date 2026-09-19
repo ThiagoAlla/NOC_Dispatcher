@@ -1,0 +1,1329 @@
+<!DOCTYPE html><html lang="pt-BR"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B1015">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Aviso NOC">
+<title>Aviso de problema na rede — NOC Grupo IBL</title>
+<style>html,body{margin:0;padding:0;background:#0B1015}body{padding:14px}@media(max-width:600px){body{padding:10px}}</style>
+</head><body>
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style>
+  :root{
+    color-scheme: dark;
+    --bg: #0B1015;
+    --surface: #121922;
+    --surface-2: #182130;
+    --border: #232E3D;
+    
+    --text: #E7EDF4;
+    --text-dim: #8C99AB;
+    --text-faint: #5B6779;
+    --text-dark: #06201B;
+    
+    --signal: #35D1B8;
+    --signal-dim: rgba(53, 209, 184, 0.12);
+    --amber: #F0A742;
+    --amber-dim: rgba(240, 167, 66, 0.12);
+    --red: #EF5B5B;
+    --red-dim: rgba(239, 91, 91, 0.12);
+    
+    --purple: #A78BFA;
+    --purple-dim: rgba(167, 139, 250, 0.12);
+  }
+  *{box-sizing:border-box}
+  .noc{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+       color:var(--text);background:var(--bg);max-width:1280px;margin:0 auto;padding:4px 0 28px;line-height:1.5}
+  .noc h1{font-size:22px;color:var(--text);margin:0 0 4px}
+  .noc h2{font-size:14px;color:var(--text);margin:0;display:flex;align-items:center;justify-content:space-between}
+  .noc h2 small{display:block;font-size:12px;font-weight:400;color:var(--text-dim);margin-top:2px}
+  .sub{color:var(--text-dim);font-size:14px;margin:0 0 16px}
+  .rule{background:var(--amber-dim);border-left:4px solid var(--amber);color:var(--text);padding:11px 14px;border-radius:0 6px 6px 0;
+        font-size:14px;margin:0 0 18px}
+  .rule b{color:var(--amber)}
+
+  .grid{display:grid;grid-template-columns:1fr 420px;gap:20px;align-items:start}
+  @media(max-width:1000px){.grid{grid-template-columns:1fr}}
+  .ref{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;margin-top:20px}
+  @media(max-width:900px){.ref{grid-template-columns:1fr}}
+
+  /* Card retrátil */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px;transition:.15s}
+  .card.tec{background:var(--surface-2);border:2px dashed var(--border)}
+  .card-header{cursor:pointer;user-select:none;margin-bottom:12px}
+  .card-header h2{margin:0}
+  .card-title-group{display:flex;align-items:center;gap:4px}
+  .toggle-ico{font-size:12px;color:var(--signal);transition:transform .2s ease;display:inline-block;margin-left:8px}
+  .card.collapsed .toggle-ico{transform:rotate(-90deg)}
+  .card.collapsed .card-body{display:none}
+  .card.collapsed .card-header{margin-bottom:0}
+
+  .step{display:inline-block;background:var(--signal);color:var(--text-dark);font-size:11px;font-weight:700;
+        border-radius:20px;padding:2px 9px;margin-right:7px;vertical-align:2px}
+
+  /* ---- momento: a primeira escolha ---- */
+  .mom{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  @media(max-width:760px){.mom{grid-template-columns:1fr 1fr}}
+  @media(max-width:420px){.mom{grid-template-columns:1fr}}
+  .m{border:2px solid var(--border);background:var(--surface-2);border-radius:9px;padding:13px;cursor:pointer;
+     font-family:inherit;text-align:left;transition:.12s}
+  .m:hover{border-color:var(--signal)}
+  .m.on{border-color:var(--signal);background:var(--signal-dim);box-shadow:0 0 0 1px var(--signal) inset}
+  .m .i{font-size:20px;display:block;line-height:1.2}
+  .m .t{font-weight:700;font-size:15px;color:var(--text);display:block;margin-top:3px}
+  .m.on .t{color:var(--signal)}
+  .m .d{color:var(--text-dim);font-size:12px;display:block;margin-top:2px;line-height:1.35}
+
+  .sevs{display:grid;gap:8px}
+  .sev{border:2px solid var(--border);background:var(--surface-2);border-radius:7px;padding:11px 13px;cursor:pointer;
+        text-align:left;font-family:inherit;transition:.12s;display:flex;gap:11px;align-items:flex-start;width:100%;color:var(--text)}
+  .sev:hover{border-color:var(--signal)}
+  .sev.on{border-color:var(--signal);background:var(--signal-dim);box-shadow:0 0 0 1px var(--signal) inset}
+  .sev.atk.on{border-color:var(--purple);background:var(--purple-dim);box-shadow:0 0 0 1px var(--purple) inset}
+  .sev .ico{font-size:21px;line-height:1.1}
+  .sev .t{font-weight:700;font-size:15px;display:block}
+  .sev .d{color:var(--text-dim);font-size:12.5px;display:block;margin-top:2px;line-height:1.35}
+  .sev .c{font-size:11.5px;font-weight:700;margin-top:5px;display:block}
+
+  /* ---- grade de botoes curtos ---- */
+  .bt{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  @media(max-width:520px){.bt{grid-template-columns:1fr}}
+  .b{border:2px solid var(--border);background:var(--surface-2);border-radius:7px;padding:10px 12px;cursor:pointer;
+     font-family:inherit;text-align:left;font-size:14px;font-weight:600;color:var(--text);transition:.12s;
+     display:flex;gap:9px;align-items:center}
+  .b:hover{border-color:var(--signal)}
+  .b.on{border-color:var(--signal);background:var(--signal-dim);box-shadow:0 0 0 1px var(--signal) inset;color:var(--signal)}
+  .b .i{font-size:18px}
+
+  label{display:block;font-size:13px;font-weight:700;color:var(--signal);margin:13px 0 4px}
+  label span{font-weight:400;color:var(--text-dim);font-size:12px}
+  input,textarea,select{width:100%;font-family:inherit;font-size:14px;padding:9px 10px;
+    border:1px solid var(--border);border-radius:6px;background:var(--surface-2);color:var(--text)}
+  input:focus,textarea:focus,select:focus{outline:2px solid var(--signal);outline-offset:-1px;border-color:var(--signal)}
+  textarea{resize:vertical;min-height:52px}
+  .dup{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:520px){.dup{grid-template-columns:1fr}}
+
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin:5px 0 0}
+  .chip{border:1px solid var(--border);background:var(--surface-2);border-radius:20px;padding:4px 11px;cursor:pointer;
+        font-family:inherit;font-size:12.5px;color:var(--signal);transition:.12s}
+  .chip:hover{border-color:var(--signal);background:var(--signal-dim)}
+  .dica{font-size:12px;color:var(--text-dim);margin-top:5px}
+
+  /* ---- painel lateral fixo ---- */
+  .lado{position:sticky;top:14px;max-height:calc(100vh - 28px);overflow-y:auto;padding-right:2px}
+  .prev{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:14px}
+  .bolha{background:#0D131A;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:12px 14px;
+         font-size:13.5px;white-space:pre-wrap;word-break:break-word;line-height:1.5;
+         max-height:48vh;overflow:auto}
+  .acoes{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
+  button.go{flex:1;min-width:130px;background:var(--signal);color:var(--text-dark);border:0;border-radius:7px;
+    padding:12px 14px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:.12s}
+  button.go:hover{filter:brightness(1.1)}
+  button.alt{background:var(--surface-2);color:var(--text);border:2px solid var(--border);flex:0 0 auto;min-width:0}
+  button.alt:hover{border-color:var(--text-dim)}
+  .ok{color:var(--signal);font-weight:700;font-size:13.5px;margin-top:9px;display:none}
+
+  .check{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-top:12px}
+  .check .ttl{font-size:12px;font-weight:700;color:var(--signal);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px}
+  .check ul{list-style:none;margin:0;padding:0}
+  .check li{font-size:13.5px;padding:3px 0;display:flex;gap:8px;align-items:flex-start;line-height:1.35;color:var(--text)}
+  .check li.f{color:var(--text-faint)}
+  .check li b{font-weight:600;color:var(--text)}
+  .check li.f b{font-weight:600;color:var(--text-dim)}
+  .falta{background:var(--red-dim);border:2px solid var(--red);color:var(--red);border-radius:8px;
+         padding:10px 13px;margin-top:12px;font-size:13.5px;font-weight:600;display:none}
+
+  .relogio{background:var(--surface);border:2px solid var(--amber);border-radius:8px;padding:12px 14px;margin-top:12px}
+  .relogio .h{font-size:28px;font-weight:800;color:var(--amber);line-height:1.1}
+  .relogio .l{font-size:12px;color:var(--text-dim)}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+  th{background:var(--surface-2);color:var(--signal);text-align:left;padding:8px 9px;font-weight:700;font-size:12px;border-bottom:1px solid var(--border)}
+  td{padding:8px 9px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--text)}
+  tr:nth-child(even) td{background:var(--surface-2)}
+  .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;display:inline-block}
+  .tag.grupo{background:var(--signal-dim);color:var(--signal)}
+  .tag.reg{background:var(--surface-2);color:var(--text-dim);border:1px solid var(--border)}
+  .foot{color:var(--text-faint);font-size:12px;margin-top:22px;border-top:1px solid var(--border);padding-top:12px}
+  .hide{display:none}
+
+  /* ================= celular ================= */
+  .barra{display:none}
+  .fundo{display:none}
+  .fecha{display:none}
+  @media(max-width:1000px){
+    input,textarea,select{font-size:16px;padding:11px 12px}
+    .b{padding:14px 12px}
+    .sev{padding:14px 13px}
+    .m{padding:14px}
+    .chip{padding:7px 13px;font-size:14px}
+    .noc{padding-bottom:86px}
+
+    .lado{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:60;
+          background:var(--surface);border-radius:16px 16px 0 0;padding:12px;
+          max-height:86vh;overflow:auto;transform:translateY(102%);
+          transition:transform .22s ease;box-shadow:0 -4px 24px rgba(0,0,0,.6);
+          border-top:1px solid var(--border)}
+    .lado.aberto{transform:translateY(0)}
+    .bolha{max-height:none}
+    .fundo{display:block;position:fixed;top:0;left:0;right:0;bottom:0;
+           background:rgba(0,0,0,.7);z-index:55;opacity:0;pointer-events:none;
+           transition:opacity .22s}
+    .fundo.aberto{opacity:1;pointer-events:auto}
+    .fecha{display:block;width:100%;border:0;background:var(--surface-2);color:var(--text);
+           border-radius:9px;padding:12px;font-family:inherit;font-size:16px;
+           font-weight:700;margin-top:10px;cursor:pointer;border:1px solid var(--border);
+           margin-bottom:calc(4px + env(safe-area-inset-bottom,0px))}
+
+    .barra{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:70;gap:8px;
+           padding:10px 12px;background:var(--surface);border-top:1px solid var(--border);
+           box-shadow:0 -2px 12px rgba(0,0,0,.5);
+           padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+    .barra button{flex:1;border:0;border-radius:9px;padding:13px 10px;line-height:1.2;
+                  font-family:inherit;font-size:16px;font-weight:700;cursor:pointer}
+    .barra .ver{background:var(--surface-2);color:var(--signal);border:2px solid var(--signal)}
+    .barra .cop{background:var(--signal);color:var(--text-dark)}
+    .barra .n{display:block;font-size:11.5px;font-weight:600;opacity:.8;margin-top:2px}
+  }
+</style>
+
+<div class="noc">
+  <h1>Aviso de problema na rede — NOC</h1>
+  <p class="sub">Escolha as opções, copie e cole no grupo <b>Avisos - Eventos Massivos</b>. Quase tudo já vem escrito.</p>
+
+  <div class="rule">
+    <b>A regra que não se quebra:</b> todo aviso termina com a hora do próximo — e esse próximo é mandado
+    mesmo quando não há novidade. <b>“Sem novidade” já é uma resposta.</b> O que deixa o time perdido é o silêncio.
+  </div>
+
+  <div class="card" id="card-step1">
+    <div class="card-header">
+      <h2>
+        <div class="card-title-group">
+          <span class="step">1</span>Que aviso você vai mandar agora
+        </div>
+        <span class="toggle-ico">▼</span>
+      </h2>
+    </div>
+    <div class="card-body">
+      <div class="mom" id="momentos"></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="card" id="card-sev">
+        <div class="card-header">
+          <h2>
+            <div class="card-title-group">
+              <span class="step">2</span>Qual o tamanho do problema
+            </div>
+            <span class="toggle-ico">▼</span>
+          </h2>
+          <small style="display:block;font-size:12px;font-weight:400;color:var(--text-dim);margin-top:2px">Escolha pela frase. Não precisa saber o termo técnico.</small>
+        </div>
+        <div class="card-body">
+          <div class="sevs" id="sevs"></div>
+        </div>
+      </div>
+
+      <div class="card" id="card-causa">
+        <div class="card-header">
+          <h2>
+            <div class="card-title-group">
+              <span class="step">3</span>O que causou
+            </div>
+            <span class="toggle-ico">▼</span>
+          </h2>
+          <small style="display:block;font-size:12px;font-weight:400;color:var(--text-dim);margin-top:2px">Ao escolher, as frases do aviso já vêm preenchidas.</small>
+        </div>
+        <div class="card-body">
+          <div class="bt" id="causas"></div>
+        </div>
+      </div>
+
+      <div class="card" id="card-and">
+        <div class="card-header">
+          <h2>
+            <div class="card-title-group">
+              <span class="step">3</span>O que mudou desde o último aviso
+            </div>
+            <span class="toggle-ico">▼</span>
+          </h2>
+          <small style="display:block;font-size:12px;font-weight:400;color:var(--text-dim);margin-top:2px">Escolha uma. Se nada mudou, escolha “sem novidade” e mande assim mesmo.</small>
+        </div>
+        <div class="card-body">
+          <div class="bt" id="andamentos"></div>
+        </div>
+      </div>
+
+      <div class="card" id="card-detalhes">
+        <div class="card-header">
+          <h2>
+            <div class="card-title-group">
+              <span class="step">4</span>Os detalhes <span class="tag grupo">VAI PARA O GRUPO</span>
+            </div>
+            <span class="toggle-ico">▼</span>
+          </h2>
+        </div>
+        <div class="card-body">
+          <!-- comum a todos os momentos -->
+          <div id="f-onde">
+            <label>Em quais cidades ou bairros</label>
+            <input id="cidades" placeholder="Paragominas e Ulianópolis">
+            <div class="chips" id="chips-cidades"></div>
+            <div class="dica" id="dica-cidades">As cidades que você digitar ficam salvas aqui para a próxima vez.</div>
+          </div>
+
+          <!-- primeiro aviso -->
+          <div id="f-ab" class="hide">
+            <label>O que está acontecendo <span>— já vem preenchido pela causa, pode trocar</span></label>
+            <select id="oque-pre"></select>
+            <textarea id="oque" style="margin-top:6px" placeholder="Ou escreva do seu jeito, como explicaria para um vizinho."></textarea>
+
+            <div class="dup">
+              <div>
+                <label>Quantos clientes</label>
+                <select id="clientes"></select>
+              </div>
+              <div>
+                <label>Começou que horas</label>
+                <input id="inicio" type="time">
+              </div>
+            </div>
+
+            <label>O que já estamos fazendo <span>— já vem preenchido pela causa, pode trocar</span></label>
+            <select id="acao-pre"></select>
+            <textarea id="acao" style="margin-top:6px" placeholder="Ou escreva do seu jeito."></textarea>
+
+            <div id="box-prev">
+              <label>Previsão de voltar</label>
+              <select id="prev"></select>
+            </div>
+          </div>
+
+          <!-- atualizacao -->
+          <div id="f-at" class="hide">
+            <label>Em uma frase, o que mudou <span>— já vem preenchido, pode trocar</span></label>
+            <select id="mudou-pre"></select>
+            <textarea id="mudou" style="margin-top:6px" placeholder="Ou escreva do seu jeito."></textarea>
+
+            <div class="dup">
+              <div>
+                <label>Quanto já voltou</label>
+                <select id="voltou"></select>
+              </div>
+              <div>
+                <label>Previsão de voltar</label>
+                <select id="prev2"></select>
+              </div>
+            </div>
+          </div>
+
+          <!-- voltou ao normal -->
+          <div id="f-nr" class="hide">
+            <label>O que voltou</label>
+            <select id="n-oque-pre"></select>
+            <textarea id="n-oque" style="margin-top:6px" placeholder="Ou escreva do seu jeito."></textarea>
+            <div class="dup">
+              <div>
+                <label>Começou que horas</label>
+                <input id="inicio2" type="time">
+              </div>
+              <div>
+                <label>Voltou que horas</label>
+                <input id="n-hora" type="time">
+              </div>
+            </div>
+            <label>Ficou fora por quanto tempo <span>— calculado sozinho, dá para corrigir</span></label>
+            <input id="n-dur" placeholder="3 horas e 20 minutos">
+            <label>O cliente ainda precisa fazer alguma coisa?</label>
+            <select id="n-res-pre"></select>
+            <textarea id="n-res" style="margin-top:6px" placeholder="Ou escreva do seu jeito."></textarea>
+          </div>
+
+          <!-- relatorio final -->
+          <div id="f-en" class="hide">
+            <label>O que aconteceu, explicado de forma simples</label>
+            <select id="e-causa-pre"></select>
+            <textarea id="e-causa" style="margin-top:6px" placeholder="Ou escreva do seu jeito."></textarea>
+            <div class="dup">
+              <div>
+                <label>Quanto tempo durou</label>
+                <input id="e-dur" placeholder="3 horas e 20 minutos">
+              </div>
+              <div>
+                <label>Quantos clientes</label>
+                <select id="clientes2"></select>
+              </div>
+            </div>
+            <label>O que fizemos para resolver</label>
+            <select id="e-feito-pre"></select>
+            <textarea id="e-feito" style="margin-top:6px" placeholder="Ou escreva do seu jeito."></textarea>
+            <label>O que muda para não acontecer de novo</label>
+            <select id="e-muda-pre"></select>
+            <textarea id="e-muda" style="margin-top:6px" placeholder="Ou escreva do seu jeito."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="card-areas">
+        <div class="card-header">
+          <h2>
+            <div class="card-title-group" id="h-areas"></div>
+            <span class="toggle-ico">▼</span>
+          </h2>
+        </div>
+        <div class="card-body">
+          <div class="sevs" id="pacotes"></div>
+
+          <label>Mais alguma orientação? <span>— opcional</span></label>
+          <select id="extra-pre"></select>
+          <input id="extra" style="margin-top:6px" placeholder="Ou escreva do seu jeito.">
+
+          <div id="box-frase">
+            <label>Se o cliente perguntar, o que dizer <span>— frase única, para ninguém inventar a sua</span></label>
+            <select id="frase-pre"></select>
+            <textarea id="frase" style="margin-top:6px"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card tec" id="card-tec">
+        <div class="card-header">
+          <h2>
+            <div class="card-title-group">
+              Detalhe técnico <span class="tag reg">SÓ PARA O REGISTRO</span>
+            </div>
+            <span class="toggle-ico">▼</span>
+          </h2>
+          <small style="display:block;font-size:12px;font-weight:400;color:var(--text-dim);margin-top:2px">Nada daqui vai para o grupo. Serve para a planilha e para a conversa com a operadora.</small>
+        </div>
+        <div class="card-body">
+          <label>Causa técnica <span>— já vem preenchida pela causa que você escolheu</span></label>
+          <select id="t-causa-pre"></select>
+          <input id="t-causa" style="margin-top:6px" placeholder="Ou escreva do seu jeito.">
+          <label>Onde exatamente <span>— POP, OLT, trecho, bloco de IP</span></label>
+          <input id="t-onde" placeholder="POP Paragominas / bloco 177.54.x">
+          <div class="chips" id="chips-onde"></div>
+          <div class="dup" id="box-atk">
+            <div>
+              <label>Tipo de ataque</label>
+              <select id="t-tipo">
+                <option>Ainda identificando</option>
+                <option>Volumétrico (saturação de banda)</option>
+                <option>Amplificação (DNS, NTP, memcached)</option>
+                <option>Camada de aplicação (L7)</option>
+                <option>Ataque ao DNS recursivo</option>
+              </select>
+            </div>
+            <div>
+              <label>Volume observado</label>
+              <input id="t-vol" placeholder="12 Gbps / 2 Mpps">
+            </div>
+          </div>
+          <div id="box-mit">
+            <label>Mitigação aplicada</label>
+            <select id="t-mit">
+              <option>Filtro no upstream</option>
+              <option>Blackhole do IP alvo junto à operadora</option>
+              <option>Scrubbing acionado</option>
+              <option>Rate limit e bloqueio de origem</option>
+              <option>Em avaliação com a operadora</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="card-quem">
+        <div class="card-header">
+          <h2>
+            <div class="card-title-group">
+              <span class="step">6</span>Quem está avisando
+            </div>
+            <span class="toggle-ico">▼</span>
+          </h2>
+        </div>
+        <div class="card-body">
+          <div class="dup">
+            <div>
+              <label>Seu nome</label>
+              <input id="quem" placeholder="Mayko">
+            </div>
+            <div id="box-prox">
+              <label>Próximo aviso até <span>— já vem preenchido</span></label>
+              <input id="proxima" type="time">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="lado">
+        <div class="prev">
+          <div class="bolha" id="saida">—</div>
+          <div class="acoes">
+            <button class="go" id="btn-copiar">Copiar mensagem</button>
+            <button class="go alt" id="btn-limpar">Limpar</button>
+          </div>
+          <div class="ok" id="ok">Copiado. Cole no grupo Avisos - Eventos Massivos.</div>
+        </div>
+
+        <div class="falta" id="falta"></div>
+
+        <div class="check">
+          <div class="ttl" id="check-ttl">O que não pode faltar</div>
+          <ul id="check-lista"></ul>
+        </div>
+
+        <div class="relogio" id="card-relogio">
+          <div class="l">Próximo aviso até</div>
+          <div class="h" id="rel">--:--</div>
+          <div class="l" id="rel-nota" style="margin-top:4px"></div>
+        </div>
+
+        <button type="button" class="fecha" id="btn-fechar">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="ref">
+    <div>
+      <div class="card hide" id="card-planilha" style="background:var(--signal-dim);border-color:var(--signal)">
+        <div class="card-header">
+          <h2>
+            <div class="card-title-group" style="color:var(--signal)">
+              Registrar na planilha
+            </div>
+            <span class="toggle-ico">▼</span>
+          </h2>
+          <small style="display:block;font-size:12px;font-weight:400;color:var(--text-dim);margin-top:2px">Faça isso agora, junto com este aviso. Depois ninguém lembra.</small>
+        </div>
+        <div class="card-body">
+          <div class="dica" id="ev-nota" style="margin:0 0 4px;color:var(--text)"></div>
+          <div class="dup">
+            <div>
+              <label>Terminou quando</label>
+              <input id="g-fim" type="datetime-local">
+            </div>
+            <div>
+              <label>Hora do 1º aviso <span>— anotada sozinha</span></label>
+              <input id="g-aviso1" type="time">
+            </div>
+          </div>
+          <div class="dup">
+            <div>
+              <label>Quantos avisos você mandou <span>— contados sozinhos</span></label>
+              <input id="g-upd" type="number" min="0" placeholder="8">
+            </div>
+            <div>
+              <label>Começou que horas <span>— do primeiro aviso</span></label>
+              <input id="g-ini" type="time">
+            </div>
+          </div>
+          <div class="acoes">
+            <button class="go" id="btn-linha">Copiar linha da planilha</button>
+          </div>
+          <div class="ok" id="ok2">Linha copiada. Cole na primeira linha vazia da aba REGISTRO.</div>
+        </div>
+      </div>
+
+      <div class="card" id="card-cadencia">
+        <div class="card-header">
+          <h2>
+            <div class="card-title-group">
+              De quanto em quanto tempo avisar
+            </div>
+            <span class="toggle-ico">▼</span>
+          </h2>
+        </div>
+        <div class="card-body">
+          <table id="tab-cad"></table>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" id="card-ajuda">
+        <div class="card-header">
+          <h2>
+            <div class="card-title-group">
+              Como funciona
+            </div>
+            <span class="toggle-ico">▼</span>
+          </h2>
+        </div>
+        <div class="card-body">
+          <table>
+            <tr><th>Aviso</th><th>Quando mandar</th></tr>
+            <tr><td><b>Primeiro aviso</b></td><td>Até 10 minutos depois de descobrir. Mande mesmo sem saber a causa — “ainda estamos verificando” já vale.</td></tr>
+            <tr><td><b>Atualização</b></td><td>Na hora que você prometeu. Sempre, inclusive sem novidade nenhuma.</td></tr>
+            <tr><td><b>Voltou ao normal</b></td><td>Até 10 minutos depois de voltar de verdade, não quando parece que voltou.</td></tr>
+            <tr><td><b>Relatório final</b></td><td>No dia seguinte. Explica o que foi e o que muda para não repetir.</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    Grupo IBL · NOC · nada do que você digita aqui sai desta página
+  </div>
+
+  <div class="fundo" id="fundo"></div>
+  <div class="barra">
+    <button type="button" class="ver" id="btn-ver">Ver mensagem<span class="n" id="bar-n"></span></button>
+    <button type="button" class="cop" id="btn-copiar2">Copiar</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  /* ============ dados ============ */
+  var MOM = [
+    {id:'ab', i:'📣', t:'Primeiro aviso', d:'Acabou de acontecer. Mande em até 10 minutos, mesmo sem saber a causa.'},
+    {id:'at', i:'🔄', t:'Atualização',    d:'Na hora que você prometeu. Mande mesmo sem novidade.'},
+    {id:'nr', i:'✅', t:'Voltou ao normal', d:'Até 10 minutos depois de voltar de verdade.'},
+    {id:'en', i:'📋', t:'Relatório final', d:'No dia seguinte. O que foi e o que muda.'}
+  ];
+  var TIT = {ab:'ESTAMOS COM UM PROBLEMA', at:'ATUALIZAÇÃO',
+             nr:'VOLTOU AO NORMAL', en:'O QUE ACONTECEU'};
+
+  var SEV = [
+    {id:'SA', cod:'SA', ico:'🟣', t:'Ataque na rede',
+     d:'Alguém de fora está atacando nossa rede. Pode afetar tudo e voltar depois de melhorar.',
+     min:30, cor:'var(--purple)', atk:true},
+    {id:'S1', cod:'S1', ico:'🔴', t:'Cidade parada',
+     d:'Uma cidade inteira, ou mais de uma, está sem internet.',
+     min:30, cor:'var(--red)'},
+    {id:'S2', cod:'S2', ico:'🟠', t:'Parte da cidade parada',
+     d:'Um bairro ou uma região está sem internet. O resto da cidade está normal.',
+     min:60, cor:'var(--amber)'},
+    {id:'S3', cod:'S3', ico:'🟡', t:'Está lento ou caindo',
+     d:'A internet funciona, mas está devagar ou caindo de vez em quando.',
+     min:120, cor:'var(--amber)'},
+    {id:'S4', cod:'S4', ico:'🔵', t:'Manutenção marcada',
+     d:'A gente vai mexer na rede e avisou antes. É previsto.',
+     min:0, cor:'var(--signal)'}
+  ];
+
+  var CAUSAS = [
+    {id:'energia', i:'🔌', tipo:'Falta de energia', t:'Faltou energia',
+     oque:'Os clientes estão sem internet porque faltou energia na região.',
+     lento:'A internet está instável porque faltou energia em parte da rede.',
+     acao:'Os geradores já estão ligados e estamos acompanhando a volta da energia.',
+     tec:'Queda de energia da concessionária',
+     rel:'Faltou energia na região e o fornecimento demorou mais do que a autonomia das nossas baterias.'},
+    {id:'fibra', i:'✂️', tipo:'Rompimento de fibra', t:'Cabo rompido',
+     oque:'Um cabo nosso foi rompido e os clientes ficaram sem internet.',
+     lento:'Um cabo nosso foi rompido e a internet está instável enquanto desviamos o sinal.',
+     acao:'A equipe já está a caminho do local para emendar o cabo.',
+     tec:'Rompimento de fibra',
+     rel:'Um cabo da nossa rede foi rompido e precisou ser emendado no local.'},
+    {id:'obra', i:'🚧', t:'Obra de terceiro', tipo:'Obra de terceiro',
+     oque:'Uma obra de terceiros rompeu nosso cabo e os clientes ficaram sem internet.',
+     lento:'Uma obra de terceiros danificou nosso cabo e a internet está instável.',
+     acao:'A equipe já está a caminho do local para refazer o trecho danificado.',
+     tec:'Rompimento por obra de terceiro',
+     rel:'Uma obra de terceiros na via rompeu nosso cabo, sem aviso prévio.'},
+    {id:'equip', i:'🖥️', tipo:'Falha de equipamento', t:'Equipamento com defeito',
+     oque:'Um equipamento nosso apresentou defeito e derrubou a internet dos clientes.',
+     lento:'Um equipamento nosso apresentou defeito e a internet está instável.',
+     acao:'Já identificamos o equipamento e estamos trocando agora.',
+     tec:'Falha de equipamento',
+     rel:'Um equipamento da nossa rede falhou e precisou ser substituído.'},
+    {id:'operadora', i:'🏢', tipo:'Falha da operadora', t:'Problema na operadora',
+     oque:'A operadora que fornece nosso link está com problema e os clientes ficaram sem internet.',
+     lento:'A operadora que fornece nosso link está com problema e a internet está lenta.',
+     acao:'Já abrimos chamado e estamos acompanhando a operadora minuto a minuto.',
+     tec:'Falha no link da operadora',
+     rel:'A operadora que fornece nosso link teve uma falha fora da nossa rede.'},
+    {id:'ataque', i:'🛡️', tipo:'Ataque', t:'Ataque de fora',
+     oque:'Estamos sofrendo um ataque de fora que está derrubando a internet dos clientes.',
+     lento:'Estamos sofrendo um ataque de fora e a internet está lenta por causa disso.',
+     acao:'Estamos bloqueando o ataque junto com a operadora e o acesso vai voltando aos poucos.',
+     tec:'Ataque externo',
+     rel:'Nossa rede foi alvo de um ataque vindo de fora, que sobrecarregou os equipamentos.'},
+    {id:'manut', i:'🔧', tipo:'Manutenção programada', t:'Manutenção programada',
+     oque:'Vamos mexer na rede para uma manutenção já programada e a internet vai ficar fora nesse período.',
+     lento:'Estamos fazendo uma manutenção programada e a internet pode oscilar nesse período.',
+     acao:'A manutenção está em andamento dentro do horário combinado.',
+     tec:'Manutenção programada',
+     rel:'Foi uma manutenção programada, avisada com antecedência.'},
+    {id:'sistema', i:'📱', tipo:'Outro', t:'App ou central fora',
+     oque:'Nosso aplicativo e a central de atendimento estão fora do ar. A internet dos clientes não foi afetada.',
+     lento:'Nosso aplicativo e a central de atendimento estão lentos. A internet dos clientes não foi afetada.',
+     acao:'A equipe de sistemas já está trabalhando para restabelecer.',
+     tec:'Indisponibilidade de sistema interno',
+     rel:'Um sistema interno ficou indisponível, sem afetar a internet dos clientes.'},
+    {id:'nsei', i:'❓', tipo:'Outro', t:'Ainda não sabemos',
+     oque:'Os clientes estão sem internet e ainda estamos verificando o motivo.',
+     lento:'A internet está lenta e ainda estamos verificando o motivo.',
+     acao:'Ainda estamos verificando o que causou. Assim que descobrirmos, aviso aqui.',
+     tec:'Em apuração',
+     rel:'A causa foi apurada durante o atendimento e está descrita abaixo.'}
+  ];
+
+  var ANDAMENTO = [
+    {id:'procurando', i:'🔍', t:'Ainda procurando', f:'Continuamos procurando a causa. Assim que encontrarmos, aviso aqui.'},
+    {id:'achou',      i:'🎯', t:'Já achamos o problema', f:'Já encontramos o que causou e estamos corrigindo agora.'},
+    {id:'campo',      i:'🚚', t:'Equipe chegou no local', f:'Nossa equipe chegou no local e começou a correção.'},
+    {id:'voltando',   i:'📈', t:'Já está voltando', f:'Estamos voltando para o cenário de normalidade. Alguns clientes ainda podem estar com dificuldade em algum acesso.'},
+    {id:'semnov',     i:'⏳', t:'Sem novidade', f:'Sem novidade desde o último aviso. Continuamos trabalhando no problema.'},
+    {id:'piorou',     i:'⚠️', t:'Piorou ou aumentou', f:'O problema aumentou e agora afeta uma área maior. Estamos reforçando a equipe.'},
+    {id:'prazo',      i:'🕐', t:'O prazo mudou', f:'Vamos precisar de mais tempo do que o previsto. O novo prazo está abaixo.'},
+    {id:'quase',      i:'🏁', t:'Está terminando', f:'A correção está na fase final. Em breve mando a confirmação de que voltou.'}
+  ];
+
+  var PACOTES = [
+    {id:'igual', ico:'🔁', t:'Segue igual ao aviso anterior',
+     d:'Nada muda em relação ao que você já avisou. Serve para atualização.', so:'at', linhas:null},
+    {id:'nada', ico:'🟢', t:'Nada muda',
+     d:'Todo mundo segue a rotina normal. Serve para lentidão pequena ou manutenção rápida.',
+     linhas:[]},
+    {id:'avisar', ico:'🔵', t:'Só avisar o cliente',
+     d:'Atendimento explica. Loja e equipe de rua seguem normal.',
+     linhas:['_Atendimento:_ explicar com a frase abaixo, sem abrir chamado técnico.',
+             '_Lojas e vendas:_ podem marcar e instalar normalmente.',
+             '_Equipe de rua:_ rotina normal.']},
+    {id:'agenda', ico:'🟠', t:'Parar agendamento nas cidades afetadas',
+     d:'Ninguém marca instalação nem manda técnico para lá enquanto durar.',
+     linhas:['_Atendimento:_ explicar com a frase abaixo, sem abrir chamado técnico.',
+             '_Lojas e vendas:_ não marcar instalação nas cidades afetadas.',
+             '_Equipe de rua:_ não precisa deslocar, o problema não é na casa do cliente.']},
+    {id:'tudo', ico:'🔴', t:'Parar tudo na região até novo aviso',
+     d:'Sem instalação, sem ativação e sem visita nas cidades afetadas.',
+     linhas:['_Atendimento:_ explicar com a frase abaixo, sem abrir chamado técnico.',
+             '_Lojas e vendas:_ não marcar instalação, ativação nem visita nas cidades afetadas.',
+             '_Equipe de rua:_ não deslocar. Quem já estiver em rota para lá, retornar.']}
+  ];
+  var SUGESTAO = {SA:'agenda', S1:'tudo', S2:'agenda', S3:'avisar', S4:'avisar'};
+
+  var L_CLIENTES = ['ainda estamos levantando','poucos clientes','cerca de 100','cerca de 300','cerca de 500',
+                    'cerca de 1.000','cerca de 2.000','cerca de 3.000','cerca de 5.000','mais de 5.000'];
+  var L_PREV = ['Ainda não temos previsão','Em até 1 hora','Em até 2 horas','Em até 4 horas','Em até 6 horas',
+                'Ainda hoje','Só amanhã','Digo no próximo aviso'];
+  var L_VOLTOU = ['ainda ninguém','alguns clientes','cerca de metade','a maior parte','quase todos','todos'];
+  var L_OQUE = ['Os clientes estão sem internet.',
+                'Uma parte dos clientes está sem internet e outra parte está com a internet lenta.',
+                'A internet está muito lenta.',
+                'A internet está caindo e voltando o tempo todo.',
+                'A internet dos clientes de empresa está fora. Os clientes de casa não foram afetados.',
+                'Os clientes conseguem navegar, mas alguns sites e aplicativos podem não abrir.',
+                'Nosso aplicativo e a central de atendimento estão fora do ar. A internet dos clientes não foi afetada.',
+                'Vamos desligar a rede para uma manutenção programada.'];
+  var L_ACAO = ['Ainda estamos verificando o que causou.',
+                'Já identificamos o problema e estamos corrigindo agora.',
+                'Nossa equipe está indo para o local neste momento.',
+                'Nossa equipe já está no local trabalhando na correção.',
+                'Estamos resolvendo junto com a operadora que fornece nosso link.',
+                'Estamos bloqueando o ataque e o acesso está voltando aos poucos.',
+                'Já corrigimos e estamos testando antes de liberar para todos.',
+                'Estamos aguardando a energia voltar para religar os equipamentos.'];
+  var L_NOQUE = ['A internet voltou.',
+                 'A internet voltou para todos os clientes.',
+                 'A internet voltou, mas alguns clientes ainda podem estar sem.',
+                 'A velocidade voltou ao normal.',
+                 'O aplicativo e a central de atendimento voltaram.',
+                 'A manutenção terminou e está tudo funcionando.'];
+  var L_NRES = ['Não. Está tudo normal, não precisa fazer nada.',
+                'Alguns clientes podem precisar desligar e ligar o roteador da tomada.',
+                'Pode haver lentidão nas próximas horas até estabilizar por completo.',
+                'Alguns clientes ainda podem estar sem sinal. Estamos verificando caso a caso.',
+                'Quem continuar sem sinal deve abrir chamado no atendimento.'];
+  var L_FEITO = ['Trocamos o equipamento com defeito.',
+                 'Emendamos o cabo rompido no local.',
+                 'Desviamos o sinal por outro caminho até o conserto ficar pronto.',
+                 'Ligamos os geradores e mantivemos a rede no ar até a energia voltar.',
+                 'Bloqueamos o ataque junto com a operadora.',
+                 'A operadora corrigiu a falha no link dela e acompanhamos até normalizar.',
+                 'Reiniciamos e reconfiguramos o sistema que estava fora.'];
+  var L_MUDA = ['Vamos criar um caminho reserva nesse trecho.',
+                'Vamos trocar o equipamento por um modelo mais novo.',
+                'Vamos aumentar a autonomia de bateria nesse ponto.',
+                'Vamos cobrar da operadora um prazo de atendimento menor.',
+                'Vamos reforçar a proteção contra ataques.',
+                'Vamos revisar o processo de aviso para o time.',
+                'Nada muda: foi uma situação fora do nosso controle e já tratada.'];
+  var L_EXTRA = ['A loja vai abrir mais tarde hoje.',
+                 'A central de atendimento está com fila grande.',
+                 'Quem estiver de plantão, fique atento ao grupo.',
+                 'Não prometa prazo para o cliente além do que está neste aviso.',
+                 'Clientes de empresa e poder público têm prioridade no religamento.'];
+  var L_FRASE = ['Estamos com uma instabilidade na rede da região. Nossa equipe já está trabalhando para normalizar o mais rápido possível.',
+                 'Estamos com uma interrupção na região. A equipe já está no local e avisaremos assim que normalizar.',
+                 'Estamos fazendo uma manutenção programada na sua região. A internet volta assim que ela terminar.',
+                 'A internet já foi normalizada. Se a sua ainda não voltou, desligue e ligue o roteador da tomada.',
+                 'Estamos com um problema no nosso fornecedor de link. Já estamos cobrando a solução e avisaremos assim que normalizar.'];
+  var L_TEC = ['Rompimento de fibra','Queda de energia da concessionária','Falha de equipamento',
+               'Falha no link da operadora','Ataque externo','Manutenção programada',
+               'Indisponibilidade de sistema interno','Falha de energia interna / nobreak',
+               'Erro de configuração','Em apuração'];
+
+  /* ============ estado ============ */
+  var mom='ab', sev='S1', causa='nsei', andam='procurando', pacote='tudo';
+  var $ = function(id){ return document.getElementById(id); };
+  var S = function(){ return SEV.filter(function(x){return x.id===sev;})[0]; };
+  var C = function(){ return CAUSAS.filter(function(x){return x.id===causa;})[0]; };
+  var A = function(){ return ANDAMENTO.filter(function(x){return x.id===andam;})[0]; };
+  function v(id){ var e=$(id); return e&&e.value ? String(e.value).trim() : ''; }
+  function set(id,val){ var e=$(id); if(e) e.value=val; }
+  function mostra(id,on){ var e=$(id); if(e) e.className = e.className.replace(/\s*\bhide\b/g,'') + (on?'':' hide'); }
+
+  /* ============ Sistema Retrátil (Dropdown/Collapse) ============ */
+  function initCollapsibleCards() {
+    var headers = document.querySelectorAll('.card-header');
+    headers.forEach(function(header) {
+      header.addEventListener('click', function(e) {
+        var card = header.closest('.card');
+        if(card) {
+          card.classList.toggle('collapsed');
+        }
+      });
+    });
+  }
+
+  /* ============ memoria local ============ */
+  function lerMem(k){ try{ return JSON.parse(window.localStorage.getItem('noc.'+k)||'[]'); }catch(e){ return []; } }
+  function gravaMem(k,val){
+    if(!val) return;
+    try{
+      var a=lerMem(k).filter(function(x){return x!==val;});
+      a.unshift(val);
+      window.localStorage.setItem('noc.'+k, JSON.stringify(a.slice(0,6)));
+    }catch(e){}
+  }
+
+  var evMem = null;
+  var evGuarda = (function(){
+    try{ window.localStorage.setItem('noc.t','1'); window.localStorage.removeItem('noc.t'); return true; }
+    catch(e){ return false; }
+  })();
+  function evLe(){
+    if(!evGuarda) return evMem;
+    try{ return JSON.parse(window.localStorage.getItem('noc.ev')||'null'); }catch(e){ return evMem; }
+  }
+  function evGrava(o){
+    evMem = o;
+    if(evGuarda){ try{ window.localStorage.setItem('noc.ev', JSON.stringify(o)); }catch(e){} }
+    return o;
+  }
+  function evLimpa(){
+    evMem = null;
+    if(evGuarda){ try{ window.localStorage.removeItem('noc.ev'); }catch(e){} }
+  }
+
+  function evRegistra(){
+    var ev = evLe() || {aviso1:'', updates:0, ini:'', cidades:'', sev:'', causa:''};
+    if(mom==='ab'){
+      if(!ev.aviso1) ev.aviso1 = hhmm(new Date());
+      if(!ev.data){
+        var h=new Date();
+        ev.data = String(h.getDate()).padStart(2,'0')+'/'+String(h.getMonth()+1).padStart(2,'0')+'/'+h.getFullYear();
+      }
+      ev.ini = v('inicio') || ev.ini;
+      ev.sev = sev; ev.causa = causa;
+    }
+    if(mom==='at') ev.updates = (ev.updates||0) + 1;
+    if(v('cidades')) ev.cidades = v('cidades');
+    return evGrava(ev);
+  }
+
+  function evAplica(){
+    var ev = evLe(), n = $('ev-nota');
+    if(!ev){ if(n) n.textContent = 'Nenhum evento aberto. Os campos abaixo você preenche à mão.'; return; }
+    if(ev.aviso1) set('g-aviso1', ev.aviso1);
+    if(ev.ini)    set('g-ini', ev.ini);
+    set('g-upd', String(ev.updates||0));
+    if(n){
+      n.textContent = 'Evento aberto às ' + (ev.ini||'--:--') +
+        ' · 1º aviso às ' + (ev.aviso1||'--:--') +
+        ' · ' + (ev.updates||0) + (ev.updates===1?' atualização enviada':' atualizações enviadas') +
+        '. O botão Limpar encerra este evento.' +
+        (evGuarda ? '' : ' Atenção: esta contagem se perde se você fechar a página no meio do evento.');
+    }
+  }
+
+  function evRetoma(){
+    var ev = evLe();
+    if(!ev) return;
+    if(ev.sev && !$('sevs').querySelector('.sev.on')) sev = ev.sev;
+    else if(ev.sev) sev = ev.sev;
+    if(ev.causa) causa = ev.causa;
+    if(ev.cidades && !v('cidades')) set('cidades', ev.cidades);
+    if(ev.ini && !v('inicio2')) set('inicio2', ev.ini);
+    marcaSev(); marcaGrade('causas',causa,'c');
+  }
+
+  function pintaChips(k, alvo, box){
+    var a=lerMem(k), el=$(box);
+    if(!el) return;
+    el.innerHTML = a.map(function(x){
+      return '<button type="button" class="chip" data-v="'+x.replace(/"/g,'&quot;')+'">'+x+'</button>';
+    }).join('');
+    Array.prototype.forEach.call(el.querySelectorAll('.chip'), function(b){
+      b.addEventListener('click', function(){ set(alvo, b.dataset.v); render(); });
+    });
+  }
+
+  /* ============ montagem ============ */
+  $('momentos').innerHTML = MOM.map(function(m){
+    return '<button type="button" class="m" data-m="'+m.id+'"><span class="i">'+m.i+'</span>'+
+      '<span class="t">'+m.t+'</span><span class="d">'+m.d+'</span></button>';
+  }).join('');
+
+  $('sevs').innerHTML = SEV.map(function(s){
+    var cad = s.min ? ('avisar a cada '+(s.min<60 ? s.min+' minutos' : (s.min/60)+(s.min===60?' hora':' horas'))) : 'avisar no início e no fim';
+    return '<button type="button" class="sev'+(s.atk?' atk':'')+'" data-s="'+s.id+'">'+
+      '<span class="ico">'+s.ico+'</span><span><span class="t">'+s.t+'</span>'+
+      '<span class="d">'+s.d+'</span>'+
+      '<span class="c" style="color:'+s.cor+'">'+cad+'</span></span></button>';
+  }).join('');
+
+  $('causas').innerHTML = CAUSAS.map(function(c){
+    return '<button type="button" class="b" data-c="'+c.id+'"><span class="i">'+c.i+'</span>'+c.t+'</button>';
+  }).join('');
+
+  $('andamentos').innerHTML = ANDAMENTO.map(function(a){
+    return '<button type="button" class="b" data-a="'+a.id+'"><span class="i">'+a.i+'</span>'+a.t+'</button>';
+  }).join('');
+
+  $('tab-cad').innerHTML = '<tr><th>Tamanho</th><th>Avisar a cada</th></tr>' + SEV.map(function(s){
+    return '<tr><td>'+s.ico+' <b>'+s.t+'</b></td><td><b style="color:'+s.cor+'">'+
+      (s.min ? (s.min<60 ? s.min+' min' : (s.min/60)+'h') : 'início e fim')+'</b></td></tr>';
+  }).join('');
+
+  function opcoes(id, arr, vazio){
+    var e=$(id); if(!e) return;
+    e.innerHTML = (vazio? '<option value="">'+vazio+'</option>' : '') +
+      arr.map(function(o){ return '<option>'+o+'</option>'; }).join('');
+  }
+
+  opcoes('clientes',  L_CLIENTES);
+  opcoes('clientes2', L_CLIENTES);
+  opcoes('prev',      L_PREV);
+  opcoes('prev2',     L_PREV);
+  opcoes('voltou',    L_VOLTOU);
+
+  function ligaPre(selId, campoId, arr){
+    opcoes(selId, arr, 'Escolher uma frase pronta…');
+    var e=$(selId);
+    e.innerHTML += '<option value="__">— nenhuma dessas, vou escrever —</option>';
+    e.addEventListener('change', function(){
+      if(this.value==='__'){ set(campoId,''); $(campoId).focus(); }
+      else if(this.value){ set(campoId, this.value); }
+      this.selectedIndex=0; render();
+    });
+  }
+  ligaPre('oque-pre','oque',L_OQUE);
+  ligaPre('acao-pre','acao',L_ACAO);
+  ligaPre('mudou-pre','mudou',ANDAMENTO.map(function(a){return a.f;}));
+  ligaPre('n-oque-pre','n-oque',L_NOQUE);
+  ligaPre('n-res-pre','n-res',L_NRES);
+  ligaPre('e-causa-pre','e-causa',CAUSAS.map(function(c){return c.rel;}));
+  ligaPre('e-feito-pre','e-feito',L_FEITO);
+  ligaPre('e-muda-pre','e-muda',L_MUDA);
+  ligaPre('extra-pre','extra',L_EXTRA);
+  ligaPre('frase-pre','frase',L_FRASE);
+  ligaPre('t-causa-pre','t-causa',L_TEC);
+
+  $('pacotes').innerHTML = PACOTES.map(function(p){
+    return '<button type="button" class="sev" data-p="'+p.id+'"'+(p.so?' data-so="'+p.so+'"':'')+'>'+
+      '<span class="ico">'+p.ico+'</span><span><span class="t">'+p.t+'</span>'+
+      '<span class="d">'+p.d+'</span></span></button>';
+  }).join('');
+
+  /* ============ marcacoes ============ */
+  function marcaMom(){
+    Array.prototype.forEach.call($('momentos').querySelectorAll('.m'), function(b){
+      b.className = 'm' + (b.dataset.m===mom ? ' on' : '');
+    });
+  }
+  function marcaSev(){
+    Array.prototype.forEach.call($('sevs').querySelectorAll('.sev'), function(b){
+      var s = SEV.filter(function(x){return x.id===b.dataset.s;})[0];
+      if(!s) return;
+      b.className = 'sev' + (s.atk?' atk':'') + (b.dataset.s===sev ? ' on' : '');
+    });
+  }
+  function marcaGrade(box, val, attr){
+    Array.prototype.forEach.call($(box).querySelectorAll('.b'), function(b){
+      b.className = 'b' + (b.dataset[attr]===val ? ' on' : '');
+    });
+  }
+  function marcaPacote(){
+    Array.prototype.forEach.call($('pacotes').querySelectorAll('.sev'), function(b){
+      var so = b.dataset.so;
+      b.style.display = (so && so!==mom) ? 'none' : '';
+      b.className = 'sev' + (b.dataset.p===pacote ? ' on' : '');
+    });
+  }
+
+  /* ============ o painel e o formulario mudam com o momento ============ */
+  function adapta(){
+    var abertos = (mom==='ab'||mom==='at');
+
+    $('h-areas').innerHTML = (mom==='nr')
+      ? '<span class="step">5</span>Depois que voltou <span class="tag grupo">VAI PARA O GRUPO</span>'
+      : '<span class="step">5</span>O que muda para o time <span class="tag grupo">VAI PARA O GRUPO</span>';
+
+    mostra('card-causa', mom==='ab'||mom==='en');
+    mostra('card-and',   mom==='at');
+    mostra('card-areas', mom!=='en');
+    mostra('pacotes',    abertos);
+    mostra('box-frase',  abertos);
+    mostra('f-onde',     true);
+    mostra('f-ab',       mom==='ab');
+    mostra('f-at',       mom==='at');
+    mostra('f-nr',       mom==='nr');
+    mostra('f-en',       mom==='en');
+    mostra('box-prox',   abertos);
+    mostra('card-relogio', abertos);
+    mostra('card-planilha', mom==='nr'||mom==='en');
+    mostra('box-prev',   mom==='ab' && sev!=='SA');
+
+    $('card-tec').style.display = (mom==='at') ? 'none' : '';
+    $('box-atk').style.display  = (sev==='SA') ? '' : 'none';
+    $('box-mit').style.display  = (sev==='SA') ? '' : 'none';
+
+    if(mom!=='at' && pacote==='igual') pacote = SUGESTAO[sev]||'agenda';
+  }
+
+  function aplicaCausa(){
+    var c=C();
+    set('oque', sev==='S3' ? c.lento : c.oque);
+    set('acao', c.acao);
+    set('t-causa', c.tec);
+    set('e-causa', c.rel);
+    var qual = {manut:2, operadora:4}[causa];
+    set('frase', L_FRASE[qual===undefined ? 0 : qual]);
+  }
+
+  function hhmm(d){ return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+  function sugereProx(){
+    var s=S();
+    if(mom==='nr'||mom==='en'||!s.min){ set('proxima',''); return; }
+    var d=new Date(Date.now()+s.min*60000);
+    d.setMinutes(Math.ceil(d.getMinutes()/5)*5,0,0);
+    set('proxima', hhmm(d));
+  }
+  function calcDuracao(){
+    var a=v('inicio2'), b=v('n-hora');
+    if(!a||!b) return;
+    var m1=(+a.slice(0,2))*60+(+a.slice(3,5)), m2=(+b.slice(0,2))*60+(+b.slice(3,5));
+    var dif=m2-m1; if(dif<0) dif+=1440;
+    var h=Math.floor(dif/60), mi=dif%60, txt;
+    if(h===0) txt=mi+' minutos';
+    else if(mi===0) txt=h+(h===1?' hora':' horas');
+    else txt=h+(h===1?' hora e ':' horas e ')+mi+' minutos';
+    set('n-dur', txt);
+    set('e-dur', txt);
+  }
+
+  /* ============ a mensagem ============ */
+  function monta(){
+    var s=S(), agora=new Date();
+    var data=String(agora.getDate()).padStart(2,'0')+'/'+String(agora.getMonth()+1).padStart(2,'0');
+    var L=[];
+    var ico = (mom==='nr') ? '🟢' : (mom==='en' ? '📋' : s.ico);
+
+    var manut = (sev==='S4');
+    var titulo = TIT[mom];
+    if(manut){
+      if(mom==='ab') titulo='MANUTENÇÃO PROGRAMADA';
+      if(mom==='at') titulo='ATUALIZAÇÃO DA MANUTENÇÃO';
+      if(mom==='nr') titulo='MANUTENÇÃO CONCLUÍDA';
+    }
+
+    L.push(ico+' *'+titulo+'*');
+    if(mom==='ab' && !manut) L.push('_'+s.t+'_');
+    if(mom==='at') L.push('_'+(manut?'Manutenção marcada':s.t)+(v('cidades')?' · '+v('cidades'):'')+'_');
+    if(mom==='en'){
+      var dEv = v('g-fim') ? v('g-fim').slice(8,10)+'/'+v('g-fim').slice(5,7) : '';
+      var subt = [v('cidades'), dEv].filter(function(x){return x;}).join(' · ');
+      if(subt) L.push('_'+subt+'_');
+    }
+    L.push('');
+
+    if(mom==='ab'){
+      if(v('oque'))     L.push('*O que está acontecendo:* '+v('oque'));
+      if(v('cidades'))  L.push('*Onde:* '+v('cidades'));
+      if(v('clientes')) L.push('*Clientes afetados:* '+v('clientes'));
+      if(v('inicio'))   L.push('*Começou:* '+v('inicio'));
+      L.push('');
+      if(v('acao'))     L.push('*O que já estamos fazendo:* '+v('acao'));
+      if(sev==='SA')    L.push('*Previsão de voltar:* o bloqueio está em andamento e o acesso deve melhorar aos poucos.');
+      else if(v('prev')) L.push('*Previsão de voltar:* '+v('prev'));
+    }
+
+    if(mom==='at'){
+      if(v('mudou'))  L.push('*O que mudou:* '+v('mudou'));
+      if(v('voltou')) L.push('*Quanto já voltou:* '+v('voltou'));
+      if(sev==='SA')  L.push('*Previsão de voltar:* o bloqueio está em andamento e o acesso deve melhorar aos poucos.');
+      else if(v('prev2')) L.push('*Previsão de voltar:* '+v('prev2'));
+    }
+
+    if(mom==='nr'){
+      if(v('n-oque'))  L.push('*O que voltou:* '+v('n-oque'));
+      if(v('cidades')) L.push('*Onde:* '+v('cidades'));
+      if(v('n-hora'))  L.push('*Voltou às:* '+v('n-hora'));
+      if(v('n-dur'))   L.push('*Ficou fora:* '+v('n-dur'));
+      if(v('n-res')){ L.push(''); L.push('*O cliente precisa saber:* '+v('n-res')); }
+    }
+
+    if(mom==='en'){
+      if(v('e-causa')) L.push('*O que aconteceu:* '+v('e-causa'));
+      if(v('e-dur'))   L.push('*Quanto tempo durou:* '+v('e-dur'));
+      if(v('clientes2')) L.push('*Clientes afetados:* '+v('clientes2'));
+      L.push('');
+      if(v('e-feito')) L.push('*O que fizemos:* '+v('e-feito'));
+      if(v('e-muda'))  L.push('*O que muda daqui pra frente:* '+v('e-muda'));
+    }
+
+    if(mom==='ab' || mom==='at'){
+      var pk = PACOTES.filter(function(x){return x.id===pacote;})[0];
+      L.push('');
+      if(!pk || pk.linhas===null){
+        L.push('*O que muda para o time:* segue igual ao aviso anterior.');
+      } else if(pk.linhas.length){
+        L.push('*O que muda para o time:* '+pk.t);
+        pk.linhas.forEach(function(l){ L.push('• '+l); });
+      } else {
+        L.push('*O que muda para o time:* nada, todo mundo segue a rotina normal.');
+      }
+      if(v('extra')) L.push('• _Atenção:_ '+v('extra'));
+      if(v('frase') && !(mom==='at' && pacote==='igual')){
+        L.push('');
+        L.push('*Se o cliente perguntar, diga:*');
+        L.push('"'+v('frase')+'"');
+      }
+    }
+
+    if(mom==='nr'){
+      L.push('');
+      L.push('*Já pode voltar ao normal:*');
+      L.push('• _Atendimento:_ atender normalmente.');
+      L.push('• _Lojas e vendas:_ podem marcar instalação e ativação de novo.');
+      L.push('• _Equipe de rua:_ rotina normal.');
+      if(v('extra')) L.push('• _Atenção:_ '+v('extra'));
+    }
+
+    L.push('');
+    if(mom==='nr'){
+      L.push(manut
+        ? '✅ *Manutenção concluída.* Está tudo funcionando normalmente.'
+        : '✅ *Problema encerrado.* Amanhã mando o resumo do que aconteceu.');
+    } else if(mom==='en'){
+      L.push('📋 *Resumo final.* Dúvidas, é só chamar o NOC.');
+    } else if(v('proxima')){
+      L.push('⏱️ *Próximo aviso até '+v('proxima')+'* — mando mesmo se não tiver novidade.');
+    } else if(sev==='S4'){
+      L.push('⏱️ *Aviso no início e no fim da manutenção.*');
+    } else {
+      L.push('⏱️ *Falta preencher a hora do próximo aviso.*');
+    }
+    L.push('_'+(v('quem') ? v('quem')+' · NOC' : 'NOC')+' · '+data+' '+hhmm(agora)+'_');
+    L.push('');
+    L.push('🔒 *USO INTERNO — NÃO ENCAMINHAR EM NENHUMA HIPÓTESE*');
+
+    return L.join('\n').replace(/\n{3,}/g,'\n\n');
+  }
+
+  /* ============ checklist do momento ============ */
+  var CHECK = {
+    ab:[['Onde está o problema',function(){return v('cidades');}],
+        ['O que está acontecendo',function(){return v('oque');}],
+        ['Que horas começou',function(){return v('inicio');}],
+        ['O que já estamos fazendo',function(){return v('acao');}],
+        ['Hora do próximo aviso',function(){return sev==='S4' ? 'ok' : v('proxima');}],
+        ['Seu nome',function(){return v('quem');}]],
+    at:[['O que mudou desde o último aviso',function(){return v('mudou');}],
+        ['Quanto já voltou',function(){return v('voltou');}],
+        ['Hora do próximo aviso',function(){return sev==='S4' ? 'ok' : v('proxima');}],
+        ['Seu nome',function(){return v('quem');}]],
+    nr:[['O que voltou',function(){return v('n-oque');}],
+        ['Onde',function(){return v('cidades');}],
+        ['Que horas voltou',function(){return v('n-hora');}],
+        ['Quanto tempo ficou fora',function(){return v('n-dur');}],
+        ['Seu nome',function(){return v('quem');}],
+        ['Registrar na planilha (aqui embaixo)',function(){return v('g-fim');}]],
+    en:[['O que aconteceu',function(){return v('e-causa');}],
+        ['O que fizemos',function(){return v('e-feito');}],
+        ['O que muda daqui pra frente',function(){return v('e-muda');}],
+        ['Seu nome',function(){return v('quem');}]]
+  };
+  var CHECK_TTL = {ab:'O que não pode faltar no primeiro aviso',
+                   at:'O que não pode faltar na atualização',
+                   nr:'O que não pode faltar no encerramento',
+                   en:'O que não pode faltar no relatório'};
+
+  function pintaCheck(){
+    var itens = CHECK[mom], faltam = 0;
+    $('check-ttl').textContent = CHECK_TTL[mom];
+    $('check-lista').innerHTML = itens.map(function(it){
+      var ok = !!it[1]();
+      if(!ok) faltam++;
+      return '<li class="'+(ok?'':'f')+'">'+(ok?'✅':'⬜')+' <b>'+it[0]+'</b></li>';
+    }).join('');
+
+    var f=$('falta');
+    if((mom==='ab'||mom==='at') && sev!=='S4' && !v('proxima')){
+      f.textContent='Falta a hora do próximo aviso. Sem ela o time fica no escuro.';
+      f.style.display='block';
+    } else if(faltam>0){
+      f.textContent='Ainda faltam '+faltam+(faltam===1?' item':' itens')+' da lista abaixo.';
+      f.style.display='block';
+    } else {
+      f.style.display='none';
+    }
+
+    $('bar-n').textContent = faltam
+      ? faltam + (faltam===1 ? ' item faltando' : ' itens faltando')
+      : 'tudo preenchido';
+  }
+
+  function render(){
+    $('saida').textContent = monta();
+    $('rel').textContent = v('proxima')||'--:--';
+    $('rel-nota').textContent = v('proxima')
+      ? 'Se não tiver novidade, mande assim mesmo.'
+      : (sev==='S4' ? 'Manutenção marcada: basta avisar quando começar e quando terminar.'
+                    : 'Preencha a hora antes de enviar.');
+    pintaCheck();
+  }
+
+  /* ============ eventos ============ */
+  $('momentos').addEventListener('click', function(e){
+    var b=e.target.closest('.m'); if(!b) return;
+    mom=b.dataset.m;
+    if(mom==='at') pacote='igual';
+    if(mom==='ab') pacote=SUGESTAO[sev]||'agenda';
+    if(mom==='nr'||mom==='en'){ evRetoma(); evAplica(); }
+    marcaMom(); adapta(); marcaPacote(); sugereProx(); render();
+  });
+
+  $('sevs').addEventListener('click', function(e){
+    var b=e.target.closest('.sev'); if(!b) return;
+    sev=b.dataset.s;
+    if(sev==='SA') { causa='ataque'; marcaGrade('causas','ataque','c'); }
+    if(sev==='S4') { causa='manut';  marcaGrade('causas','manut','c'); }
+    if(mom!=='at') pacote = SUGESTAO[sev] || 'agenda';
+    aplicaCausa(); marcaSev(); adapta(); marcaPacote(); sugereProx(); render();
+  });
+
+  $('causas').addEventListener('click', function(e){
+    var b=e.target.closest('.b'); if(!b) return;
+    causa=b.dataset.c;
+    if(causa==='ataque' && sev!=='SA'){ sev='SA'; marcaSev(); pacote=SUGESTAO.SA; }
+    if(causa==='manut'  && sev!=='S4'){ sev='S4'; marcaSev(); pacote=SUGESTAO.S4; }
+    aplicaCausa(); marcaGrade('causas',causa,'c'); adapta(); marcaPacote(); sugereProx(); render();
+  });
+
+  $('andamentos').addEventListener('click', function(e){
+    var b=e.target.closest('.b'); if(!b) return;
+    andam=b.dataset.a;
+    set('mudou', A().f);
+    marcaGrade('andamentos',andam,'a'); render();
+  });
+
+  $('pacotes').addEventListener('click', function(e){
+    var b=e.target.closest('.sev'); if(!b) return;
+    pacote=b.dataset.p; marcaPacote(); render();
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('.noc input, .noc textarea, .noc select'), function(el){
+    el.addEventListener('input', render);
+    el.addEventListener('change', render);
+  });
+  $('inicio2').addEventListener('change', function(){ calcDuracao(); render(); });
+  $('n-hora').addEventListener('change', function(){ calcDuracao(); render(); });
+
+  /* ============ copiar ============ */
+  function copia(txt, elOk){
+    var done=function(){ elOk.style.display='block'; setTimeout(function(){ elOk.style.display='none'; },3000); };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(done, function(){ fb(txt,done); });
+    } else fb(txt,done);
+  }
+  function fb(txt,cb){
+    var ta=document.createElement('textarea'); ta.value=txt;
+    ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); cb(); }catch(e){}
+    document.body.removeChild(ta);
+  }
+  function copiarMensagem(){
+    gravaMem('cidades', v('cidades'));
+    gravaMem('onde', v('t-onde'));
+    pintaChips('cidades','cidades','chips-cidades');
+    pintaChips('onde','t-onde','chips-onde');
+    evRegistra(); evAplica();
+    copia($('saida').textContent, $('ok'));
+  }
+  $('btn-copiar').addEventListener('click', copiarMensagem);
+
+  function gaveta(on){
+    document.querySelector('.lado').className = 'lado' + (on?' aberto':'');
+    $('fundo').className = 'fundo' + (on?' aberto':'');
+  }
+  $('btn-ver').addEventListener('click', function(){ gaveta(true); });
+  $('btn-fechar').addEventListener('click', function(){ gaveta(false); });
+  $('fundo').addEventListener('click', function(){ gaveta(false); });
+  $('btn-copiar2').addEventListener('click', function(){
+    var b=this;
+    copiarMensagem();
+    b.textContent='Copiado ✓';
+    setTimeout(function(){ b.textContent='Copiar'; }, 2500);
+  });
+
+  $('btn-linha').addEventListener('click', function(){
+    var h=new Date(), fim=v('g-fim'), evt=evLe();
+    var dI=(evt&&evt.data) || (String(h.getDate()).padStart(2,'0')+'/'+String(h.getMonth()+1).padStart(2,'0')+'/'+h.getFullYear());
+    var dF=fim? fim.slice(8,10)+'/'+fim.slice(5,7)+'/'+fim.slice(0,4) : '';
+    var hF=fim? fim.slice(11,16) : '';
+    var ini=v('g-ini')||v('inicio')||v('inicio2');
+    var cli=v('clientes')||v('clientes2')||'';
+    var cau=v('t-causa') || C().tec || '';
+    if(sev==='SA'){
+      cau='Ataque — '+v('t-tipo')+(v('t-mit')?'. Mitigação: '+v('t-mit'):'')+(cau?'. '+cau:'');
+    }
+    var col=['', dI, ini, dF, hF, '', S().cod, C().tipo,
+             v('cidades'), v('t-onde'), cli.replace(/[^\d]/g,''), 'Internet',
+             cau, v('g-aviso1'), '', '', v('g-upd'), '',
+             (sev==='SA'? v('t-onde') : ''), v('t-vol'), ''];
+    copia(col.join('\t'), $('ok2'));
+  });
+
+  $('btn-limpar').addEventListener('click', function(){
+    Array.prototype.forEach.call(document.querySelectorAll('.noc input, .noc textarea'), function(el){
+      if(el.id!=='quem') el.value='';
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.noc select'), function(el){ el.selectedIndex=0; });
+    evLimpa();
+    mom='ab'; sev='S1'; causa='nsei'; andam='procurando'; pacote=SUGESTAO.S1;
+    evAplica();
+    set('inicio', hhmm(new Date()));
+    set('frase', L_FRASE[0]);
+    aplicaCausa();
+    marcaMom(); marcaSev(); marcaGrade('causas',causa,'c'); marcaGrade('andamentos',andam,'a');
+    adapta(); marcaPacote(); sugereProx(); render();
+  });
+
+  /* ============ inicio ============ */
+  initCollapsibleCards();
+  set('inicio', hhmm(new Date()));
+  set('frase', L_FRASE[0]);
+  aplicaCausa();
+  pintaChips('cidades','cidades','chips-cidades');
+  pintaChips('onde','t-onde','chips-onde');
+  marcaMom(); marcaSev(); marcaGrade('causas',causa,'c'); marcaGrade('andamentos',andam,'a');
+  adapta(); marcaPacote(); sugereProx(); evAplica(); render();
+})();
+</script>
+
+</body></html>

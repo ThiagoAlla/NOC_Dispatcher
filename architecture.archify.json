@@ -1,0 +1,289 @@
+{
+  "$schema": "https://raw.githubusercontent.com/archify-spec/spec/main/schema/v1/architecture.json",
+  "version": "1.0.0",
+  "name": "NOC Incident Dispatcher",
+  "type": "architecture",
+  "metadata": {
+    "title": "NOC Incident Dispatcher - Modern Event-Driven Architecture",
+    "description": "Especificação arquitetural formal do NOC Incident Dispatcher, migrado do legado index.html monolítico para React 19, Zustand, Dexie.js (IndexedDB) e NotifierService extensível.",
+    "version": "1.0.0",
+    "updatedAt": "2026-09-19T00:25:00-03:00",
+    "author": "Senior Front-end Engineer / Software Architect",
+    "context": "Operação de missão crítica do NOC (Network Operations Center) - Grupo IBL"
+  },
+  "boundaries": [
+    {
+      "id": "layer-client",
+      "label": "Client Layer (UI Presentation)",
+      "type": "cluster",
+      "description": "Componentes React 19 desacoplados, organizados por responsabilidade atômica e orientados a design tokens tailwind."
+    },
+    {
+      "id": "layer-state",
+      "label": "State & Business Logic Layer",
+      "type": "cluster",
+      "description": "Gerenciamento de estado global reativo em memória (Zustand), máquinas de estado de incidentes, cronômetros de SLA e compilação de templates."
+    },
+    {
+      "id": "layer-persistence",
+      "label": "Persistence Layer (IndexedDB via Dexie.js)",
+      "type": "cluster",
+      "description": "Armazenamento local estruturado, reativo, com índices de busca rápida, persistência de múltiplos incidentes ativos e histórico offline."
+    },
+    {
+      "id": "layer-integration",
+      "label": "Integration Layer (Dispatch & Services)",
+      "type": "cluster",
+      "description": "Abstração de saída de comunicados e dados operacionais: Clipboard Dispatcher nativo (canal primário), Spreadsheet TSV Exporter e Monday.com Bridge Adapter (para documentação corporativa futura sem complexidade de infraestrutura de WhatsApp)."
+    }
+  ],
+  "nodes": [
+    {
+      "id": "ui-app-shell",
+      "label": "App Shell / Layout",
+      "boundaryId": "layer-client",
+      "role": "Container raiz responsivo desktop/mobile com dock inferior e sidebar adaptativa",
+      "technology": "React 19, Tailwind CSS"
+    },
+    {
+      "id": "ui-incident-header",
+      "label": "Active Incident Banner & Quick Actions",
+      "boundaryId": "layer-client",
+      "role": "Exibe status do incidente ativo, contagem de updates, severidade visual e ações de ciclo rápido (1-Click Update, Normalizar, Finalizar)",
+      "technology": "React 19 Component"
+    },
+    {
+      "id": "ui-form-dispatch",
+      "label": "Incident Dispatch Form (Wizard)",
+      "boundaryId": "layer-client",
+      "role": "Formulário segmentado com seletores de Momento, Severidade, Causa, Andamento, Pacote de Ação e Campos Dinâmicos",
+      "technology": "React Hook Form / Controlled Components"
+    },
+    {
+      "id": "ui-technical-accordion",
+      "label": "Technical Details Drawer (Registro Interno)",
+      "boundaryId": "layer-client",
+      "role": "Formulário isolado para POP, OLT, bloco IP, tipo de ataque DDoS, volumetria e mitigação upstream",
+      "technology": "React 19 Collapsible"
+    },
+    {
+      "id": "ui-preview-panel",
+      "label": "Live WhatsApp Message Preview",
+      "boundaryId": "layer-client",
+      "role": "Renderizador em tempo real da mensagem formatada no padrão WhatsApp com destaque para checklist de pendências",
+      "technology": "React 19, Virtual DOM"
+    },
+    {
+      "id": "ui-timeline-feed",
+      "label": "Incident Timeline Feed",
+      "boundaryId": "layer-client",
+      "role": "Visualizador histórico cronológico dos comunicados emitidos durante o ciclo de vida do incidente",
+      "technology": "React 19 Component"
+    },
+    {
+      "id": "ui-sla-countdown",
+      "label": "SLA Countdown & Alert Badge",
+      "boundaryId": "layer-client",
+      "role": "Widget de contagem regressiva para o próximo comunicado com alertas visuais de estouro de SLA baseado na severidade",
+      "technology": "React 19, Web Audio API / CSS Animations"
+    },
+    {
+      "id": "store-incident",
+      "label": "useIncidentStore",
+      "boundaryId": "layer-state",
+      "role": "Zustand Store gerenciando incidente ativo, rascunho de despacho, histórico local e alternância entre incidentes paralelos",
+      "technology": "Zustand 5.x"
+    },
+    {
+      "id": "store-timer",
+      "label": "useTimerStore",
+      "boundaryId": "layer-state",
+      "role": "Zustand Store com tick interval sincronizado, cálculo de expiração de SLA e disparador de alertas sonoros/visuais",
+      "technology": "Zustand + Web Workers / RAF"
+    },
+    {
+      "id": "engine-rules",
+      "label": "SLA & Cadence Rules Engine",
+      "boundaryId": "layer-state",
+      "role": "Calcula janelas de aviso (SA/S1 = 30m, S2 = 60m, S3 = 120m, S4 = marcos) e sugere pacotes operacionais e causas correlacionadas",
+      "technology": "Pure TypeScript Business Logic"
+    },
+    {
+      "id": "engine-template",
+      "label": "WhatsApp Template Compiler",
+      "boundaryId": "layer-state",
+      "role": "Compila o payload estruturado em texto formatado para WhatsApp (*bold*, _italic_, bullet points, tags confidenciais)",
+      "technology": "Pure TypeScript String Parser"
+    },
+    {
+      "id": "dexie-db",
+      "label": "NocDatabase (Dexie.js)",
+      "boundaryId": "layer-persistence",
+      "role": "Instância local do IndexedDB com versionamento de schema, transações atômicas e queries reativas via useLiveQuery",
+      "technology": "Dexie.js 4.x (IndexedDB)"
+    },
+    {
+      "id": "db-table-incidents",
+      "label": "Table: incidents",
+      "boundaryId": "layer-persistence",
+      "role": "Armazena entidade raiz do incidente: id, status, severidade, causa, cidades, timestamp de início, fim e contadores",
+      "technology": "Dexie Table<Incident, string>"
+    },
+    {
+      "id": "db-table-timeline",
+      "label": "Table: timeline_entries",
+      "boundaryId": "layer-persistence",
+      "role": "Armazena cada comunicado emitido com snapshot completo do payload, momento, andamento, operador e timestamp",
+      "technology": "Dexie Table<TimelineEntry, string>"
+    },
+    {
+      "id": "db-table-settings",
+      "label": "Table: settings & cache",
+      "boundaryId": "layer-persistence",
+      "role": "Armazena chips de cidades recentes, POPs, nome padrão do operador e configurações de webhook/notificação",
+      "technology": "Dexie Table<SettingItem, string>"
+    },
+    {
+      "id": "service-notifier",
+      "label": "NotifierService",
+      "boundaryId": "layer-integration",
+      "role": "Fachada que orquestra o envio do comunicado para o provedor configurado utilizando Strategy Pattern",
+      "technology": "TypeScript Service Layer"
+    },
+    {
+      "id": "adapter-clipboard",
+      "label": "ClipboardNotifierAdapter",
+      "boundaryId": "layer-integration",
+      "role": "Copia o texto compilado para a área de transferência usando Navigator.clipboard com fallback para execCommand",
+      "technology": "Browser Clipboard API"
+    },
+    {
+      "id": "adapter-tsv-sheet",
+      "label": "SpreadsheetTsvAdapter",
+      "boundaryId": "layer-integration",
+      "role": "Exporta linha estruturada tab-separated (TSV) padronizada para colagem direta na planilha de controle do NOC",
+      "technology": "TSV Serializer"
+    },
+    {
+      "id": "adapter-monday-bridge",
+      "label": "MondayBridgeAdapter (Future/Target)",
+      "boundaryId": "layer-integration",
+      "role": "Bridge de integração e sincronização de incidentes e timeline com boards e colunas do Monday.com (alinhado à plataforma oficial de documentação da empresa)",
+      "technology": "JSON Serializer / Monday GraphQL API v2"
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-ui-to-store",
+      "source": "ui-form-dispatch",
+      "target": "store-incident",
+      "label": "dispatchFormChange(fields)",
+      "dataFlow": "Mutação parcial de campos de despacho (Momento, Causa, Severidade, Andamento, Cidades)"
+    },
+    {
+      "id": "edge-header-to-store",
+      "source": "ui-incident-header",
+      "target": "store-incident",
+      "label": "oneClickUpdate(statusId) / normalize() / close()",
+      "dataFlow": "Comandos de transição de ciclo de vida do incidente ativo"
+    },
+    {
+      "id": "edge-store-to-rules",
+      "source": "store-incident",
+      "target": "engine-rules",
+      "label": "calculateSlaAndCadence(incident)",
+      "dataFlow": "Entidade de incidente para inferência de prazo de próximo comunicado e pacote padrão"
+    },
+    {
+      "id": "edge-rules-to-timer",
+      "source": "engine-rules",
+      "target": "store-timer",
+      "label": "setNextCadenceDeadline(targetTimestamp)",
+      "dataFlow": "Timestamp absoluto da próxima entrega de comunicado para o relógio regressivo"
+    },
+    {
+      "id": "edge-timer-to-ui",
+      "source": "store-timer",
+      "target": "ui-sla-countdown",
+      "label": "remainingSeconds & slaStatus",
+      "dataFlow": "Segundos restantes, percentual decorrido e flags de alerta (normal, crítico, estourado)"
+    },
+    {
+      "id": "edge-store-to-compiler",
+      "source": "store-incident",
+      "target": "engine-template",
+      "label": "compilePayload(incident, draft)",
+      "dataFlow": "Snapshot de dados para interpolação de texto WhatsApp"
+    },
+    {
+      "id": "edge-compiler-to-preview",
+      "source": "engine-template",
+      "target": "ui-preview-panel",
+      "label": "compiledMarkdown & missingFieldsChecklist",
+      "dataFlow": "Texto puro formatado em markdown e array de pendências de validação obrigatórias"
+    },
+    {
+      "id": "edge-store-to-dexie",
+      "source": "store-incident",
+      "target": "dexie-db",
+      "label": "persistIncident() & appendTimeline()",
+      "dataFlow": "Transações assíncronas IndexedDB de salvamento de incidente e timeline entry"
+    },
+    {
+      "id": "edge-dexie-to-tables",
+      "source": "dexie-db",
+      "target": "db-table-incidents",
+      "label": "table('incidents').put()",
+      "dataFlow": "Registro mestre do incidente com chave primária UUID/NanoID"
+    },
+    {
+      "id": "edge-dexie-to-timeline-tab",
+      "source": "dexie-db",
+      "target": "db-table-timeline",
+      "label": "table('timeline_entries').add()",
+      "dataFlow": "Registro imutável do despacho histórico com snapshot da mensagem gerada"
+    },
+    {
+      "id": "edge-dexie-to-settings",
+      "source": "dexie-db",
+      "target": "db-table-settings",
+      "label": "table('settings').put()",
+      "dataFlow": "Persistência de chips de cidades e parâmetros do operador"
+    },
+    {
+      "id": "edge-dexie-to-timeline-ui",
+      "source": "db-table-timeline",
+      "target": "ui-timeline-feed",
+      "label": "useLiveQuery(incidentTimeline)",
+      "dataFlow": "Stream reativo de entradas da timeline ordenadas decrescentemente por timestamp"
+    },
+    {
+      "id": "edge-preview-to-notifier",
+      "source": "ui-preview-panel",
+      "target": "service-notifier",
+      "label": "dispatchNotification(channel, payload)",
+      "dataFlow": "Requisição de despacho com payload compilado e metadata do operador"
+    },
+    {
+      "id": "edge-notifier-to-clipboard",
+      "source": "service-notifier",
+      "target": "adapter-clipboard",
+      "label": "notifyViaClipboard(text)",
+      "dataFlow": "Cópia direta para buffer do sistema com feedback visual"
+    },
+    {
+      "id": "edge-notifier-to-tsv",
+      "source": "service-notifier",
+      "target": "adapter-tsv-sheet",
+      "label": "copySpreadsheetRow(incident)",
+      "dataFlow": "Linha tabulada para registro oficial na planilha do NOC"
+    },
+    {
+      "id": "edge-notifier-to-monday",
+      "source": "service-notifier",
+      "target": "adapter-monday-bridge",
+      "label": "exportToMonday(incident, timeline)",
+      "dataFlow": "Payload estruturado compatível com colunas de status, timeline e updates de itens do Monday.com"
+    }
+  ]
+}
