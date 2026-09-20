@@ -173,22 +173,68 @@ flowchart LR
 
 ---
 
-## 🔄 Fluxo de Despacho em 1 Clique (*Operator-in-the-Loop*)
+## 🔄 Ciclo de Vida do Incidente (*Operator-in-the-Loop*)
 
+<details open>
+<summary><b>🔍 Diagrama de Fases Operacionais</b></summary>
+
+```mermaid
+flowchart TD
+    DET(["⚡ Incidente Detectado"]) --> AB["📣 1º Aviso (ab)\nAté 10 min (mesmo em apuração)"]
+    
+    subgraph CICLO["🔄 Ciclo de Atualização em 1 Clique (SLA Ativo)"]
+        direction TB
+        AT["🔄 Atualização Periódica (at)\nTroca rápida de status técnico"]
+        SLA{"⏱️ Cadência de SLA\nSA/S1: 15m · S2: 30m · S3: 60m"}
+        AT --> SLA
+        SLA -->|"Próximo prazo"| AT
+    end
+
+    AB --> CICLO
+    CICLO -->|"Tráfego estabilizado"| NR["✅ Normalização (nr)\nValidação de telemetria + MTTR"]
+    NR --> EN["📋 Relatório Final (en)\nCausa raiz e melhorias estruturais"]
+    EN --> FIN(["🏁 Incidente Encerrado"])
+
+    classDef startEnd fill:#0F172A,stroke:#64748B,stroke-width:1.5px,color:#E2E8F0
+    classDef abStep fill:#1E1B4B,stroke:#818CF8,stroke-width:2px,color:#F8FAFC
+    classDef loopStep fill:#172554,stroke:#38BDF8,stroke-width:2px,color:#F8FAFC
+    classDef normStep fill:#064E3B,stroke:#34D399,stroke-width:2px,color:#F8FAFC
+    classDef closeStep fill:#3B0764,stroke:#C084FC,stroke-width:2px,color:#F8FAFC
+
+    class DET,FIN startEnd
+    class AB abStep
+    class AT,SLA loopStep
+    class NR normStep
+    class EN closeStep
 ```
-[ Incidente Detectado ]
-         │
-         ▼
-[ 1º Aviso (ab) ] ──────────► Disparado em até 10 minutos (mesmo em apuração)
-         │
-         ▼ (Contagem de SLA ativa: 15 / 30 / 60 min)
-[ Atualizações (at) ] ──────► "1 Clique": Troca apenas o status técnico
-         │                    (mantém dados intactos; recalcula próximo aviso)
-         ▼
-[ Normalização (nr) ] ──────► Validação de telemetria + Cálculo automático MTTR
-         │
-         ▼
-[ Relatório Final (en) ] ───► Consolidação pós-incidente (causa raiz e melhorias)
+
+</details>
+
+---
+
+## 📡 Pipeline de Despacho & Dados
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor OP as 👤 Operador NOC
+    participant UI as 🖥️ UI (Wizard / Preview)
+    participant ST as 🧠 useIncidentStore
+    participant RL as ⚙️ Rules & SLA Engine
+    participant DB as 💾 Dexie (IndexedDB)
+    participant CP as 📋 Clipboard OS
+    participant MB as 🏢 Monday.com Bridge
+
+    OP->>UI: Pressiona Ctrl+Enter / Botão Despachar
+    UI->>ST: dispatchActiveMessage()
+    ST->>RL: validateChecklist() & compileWhatsAppMessage()
+    RL-->>ST: Texto Formatado & Metadata de SLA
+    ST->>DB: Persiste Incidente & Snapshot na Timeline
+    DB-->>ST: Confirmação de Gravação Local
+    ST->>CP: Injeta texto formatado no Clipboard
+    ST->>MB: Prepara Payload para Monday.com
+    ST-->>UI: Feedback Visual ("Copiado ✓") + Reseta Timer SLA
+    OP->>OP: Cola no Grupo Oficial do WhatsApp
 ```
 
 ---
