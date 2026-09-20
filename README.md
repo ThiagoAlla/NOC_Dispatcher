@@ -19,199 +19,69 @@
 
 ## 🏛️ Topologia Arquitetural (Archify Specification)
 
-<div align="center">
+<p align="center">
+  <img src="./docs/architecture-topology.svg" alt="Archify Architecture Topology Map" width="100%" />
+</p>
 
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 500" width="100%" height="auto" style="max-width: 980px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-  <defs>
-    <!-- Filtros de Glow -->
-    <filter id="glow-teal" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="6" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-    </filter>
-    <filter id="glow-purple" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="6" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-    </filter>
-    <filter id="card-shadow" x="-5%" y="-5%" width="110%" height="110%">
-      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.6"/>
-    </filter>
+<details open>
+<summary><b>🔍 Diagrama Interativo de Fluxo (Mermaid Flowchart)</b></summary>
 
-    <!-- Marcadores de Conectores -->
-    <marker id="arrow-teal" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1 L 10 5 L 0 9 z" fill="#35D1B8" />
-    </marker>
-    <marker id="arrow-purple" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1 L 10 5 L 0 9 z" fill="#A78BFA" />
-    </marker>
-    <marker id="arrow-amber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F0A742" />
-    </marker>
+```mermaid
+flowchart LR
+    subgraph L1["1. Client Layer (UI)"]
+        UI_WIZ["Form Wizard (Steps 1-6)"]
+        UI_BAN["Active Incident Banner"]
+        UI_PREV["Live WhatsApp Preview"]
+        UI_SLA["SLA Countdown Widget"]
+        UI_TIME["Incident Timeline Feed"]
+    end
 
-    <!-- Gradientes -->
-    <linearGradient id="bg-box" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0A0F16"/>
-      <stop offset="100%" stop-color="#06090D"/>
-    </linearGradient>
-    <linearGradient id="grad-card" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#141E2B" stop-opacity="0.9"/>
-      <stop offset="100%" stop-color="#0D141E" stop-opacity="0.9"/>
-    </linearGradient>
-    <linearGradient id="grad-teal-accent" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#35D1B8"/>
-      <stop offset="100%" stop-color="#10B981"/>
-    </linearGradient>
-  </defs>
+    subgraph L2["2. State & Rules Engine"]
+        ST_ZUS["useIncidentStore (Zustand)"]
+        ST_SLA["SLA Calculator"]
+        ST_COMP["Template Compiler"]
+        ST_MTTR["Duration & MTTR Engine"]
+        ST_CHK["Checklist Validator"]
+    end
 
-  <!-- Fundo Canvas -->
-  <rect width="980" height="500" rx="16" fill="url(#bg-box)" stroke="#1F2937" stroke-width="1.5"/>
+    subgraph L3["3. Persistence (IndexedDB)"]
+        DB_DEX["Dexie.js Database"]
+        DB_INC[("incidents Table")]
+        DB_TIM[("timeline Table")]
+        DB_SET[("settings Table")]
+    end
 
-  <!-- Título do Diagrama -->
-  <g transform="translate(30, 32)">
-    <circle cx="6" cy="6" r="5" fill="#35D1B8" />
-    <text x="20" y="10" fill="#E2E8F0" font-size="13" font-weight="700" letter-spacing="1">ARCHIFY ARCHITECTURE TOPOLOGY MAP</text>
-    <text x="320" y="10" fill="#64748B" font-size="11" font-family="monospace">v2.0.0 · REACT 19 · ZUSTAND · DEXIE · CLEAN ARCHITECTURE</text>
-  </g>
+    subgraph L4["4. Integration Layer"]
+        INT_CLIP["Clipboard (Ctrl+Enter)\n★ Canal Oficial"]
+        INT_TSV["Spreadsheet TSV"]
+        INT_MON["Monday.com Bridge"]
+    end
 
-  <!-- ==================== CAMADA 1: CLIENT PRESENTATION ==================== -->
-  <rect x="25" y="65" width="220" height="405" rx="12" fill="#0E1622" stroke="#1E2E42" stroke-width="1" />
-  <rect x="25" y="65" width="220" height="32" rx="12" fill="#142132" />
-  <rect x="25" y="85" width="220" height="12" fill="#142132" />
-  <text x="40" y="86" fill="#35D1B8" font-size="11" font-weight="700" letter-spacing="0.5">1. CLIENT LAYER (UI)</text>
+    UI_WIZ --> ST_ZUS
+    UI_BAN --> ST_ZUS
+    ST_ZUS --> ST_SLA
+    ST_ZUS --> ST_COMP
+    ST_ZUS --> ST_CHK
+    ST_ZUS --> DB_DEX
+    DB_DEX --> DB_INC
+    DB_DEX --> DB_TIM
+    DB_DEX --> DB_SET
+    ST_ZUS --> INT_CLIP
+    ST_ZUS --> INT_TSV
+    ST_ZUS --> INT_MON
 
-  <!-- Nós Camada 1 -->
-  <g transform="translate(37, 110)">
-    <!-- Node 1.1 -->
-    <rect width="196" height="56" rx="8" fill="url(#grad-card)" stroke="#26384F" stroke-width="1" filter="url(#card-shadow)"/>
-    <text x="14" y="24" fill="#F8FAFC" font-size="11" font-weight="600">Form Wizard (Steps 1-6)</text>
-    <text x="14" y="42" fill="#64748B" font-size="9.5">Momento, Severidade, Causa, Ações</text>
-    
-    <!-- Node 1.2 -->
-    <rect y="68" width="196" height="56" rx="8" fill="url(#grad-card)" stroke="#26384F" stroke-width="1" filter="url(#card-shadow)"/>
-    <text x="14" y="92" fill="#F8FAFC" font-size="11" font-weight="600">Active Incident Banner</text>
-    <text x="14" y="110" fill="#64748B" font-size="9.5">Command Center · Micro-KPIs</text>
+    classDef client fill:#0E1622,stroke:#35D1B8,stroke-width:1.5px,color:#F8FAFC
+    classDef state fill:#0E1622,stroke:#A78BFA,stroke-width:1.5px,color:#F8FAFC
+    classDef storage fill:#0E1622,stroke:#10B981,stroke-width:1.5px,color:#F8FAFC
+    classDef integration fill:#0E1622,stroke:#F0A742,stroke-width:1.5px,color:#F8FAFC
 
-    <!-- Node 1.3 -->
-    <rect y="136" width="196" height="56" rx="8" fill="url(#grad-card)" stroke="#26384F" stroke-width="1" filter="url(#card-shadow)"/>
-    <text x="14" y="160" fill="#F8FAFC" font-size="11" font-weight="600">Live WhatsApp Preview</text>
-    <text x="14" y="178" fill="#64748B" font-size="9.5">Mockup Web · Validação Checklist</text>
+    class UI_WIZ,UI_BAN,UI_PREV,UI_SLA,UI_TIME client
+    class ST_ZUS,ST_SLA,ST_COMP,ST_MTTR,ST_CHK state
+    class DB_DEX,DB_INC,DB_TIM,DB_SET storage
+    class INT_CLIP,INT_TSV,INT_MON integration
+```
 
-    <!-- Node 1.4 -->
-    <rect y="204" width="196" height="56" rx="8" fill="url(#grad-card)" stroke="#26384F" stroke-width="1" filter="url(#card-shadow)"/>
-    <text x="14" y="228" fill="#F8FAFC" font-size="11" font-weight="600">SLA Countdown Widget</text>
-    <text x="14" y="246" fill="#64748B" font-size="9.5">Decaimento Regressivo · Alerta Web Audio</text>
-
-    <!-- Node 1.5 -->
-    <rect y="272" width="196" height="56" rx="8" fill="url(#grad-card)" stroke="#26384F" stroke-width="1" filter="url(#card-shadow)"/>
-    <text x="14" y="296" fill="#F8FAFC" font-size="11" font-weight="600">Incident Timeline Feed</text>
-    <text x="14" y="314" fill="#64748B" font-size="9.5">Histórico Auditável de Despachos</text>
-  </g>
-
-  <!-- ==================== CAMADA 2: STATE & RULES ==================== -->
-  <rect x="270" y="65" width="220" height="405" rx="12" fill="#0E1622" stroke="#1E2E42" stroke-width="1" />
-  <rect x="270" y="65" width="220" height="32" rx="12" fill="#142132" />
-  <rect x="270" y="85" width="220" height="12" fill="#142132" />
-  <text x="285" y="86" fill="#A78BFA" font-size="11" font-weight="700" letter-spacing="0.5">2. STATE & RULES ENGINE</text>
-
-  <!-- Nós Camada 2 -->
-  <g transform="translate(282, 110)">
-    <!-- Node 2.1 -->
-    <rect width="196" height="56" rx="8" fill="url(#grad-card)" stroke="#4C3875" stroke-width="1" filter="url(#card-shadow)"/>
-    <text x="14" y="24" fill="#A78BFA" font-size="11" font-weight="600">useIncidentStore (Zustand)</text>
-    <text x="14" y="42" fill="#94A3B8" font-size="9.5">Draft, Ativo, Alternância Multi-Incident</text>
-
-    <!-- Node 2.2 -->
-    <rect y="68" width="196" height="56" rx="8" fill="url(#grad-card)" stroke="#334155" stroke-width="1" filter="url(#card-shadow)"/>
-    <text x="14" y="92" fill="#F8FAFC" font-size="11" font-weight="600">SLA Calculator</text>
-    <text x="14" y="110" fill="#64748B" font-size="9.5">SA/S1 (15m), S2 (30m), S3 (60m)</text>
-
-    <!-- Node 2.3 -->
-    <rect y="136" width="196" height="56" rx="8" fill="url(#grad-card)" stroke="#334155" stroke-width="1" filter="url(#card-shadow)"/>
-    <text x="14" y="160" fill="#F8FAFC" font-size="11" font-weight="600">Template Compiler</text>
-    <text x="14" y="178" fill="#64748B" font-size="9.5">Compilador WhatsApp Formal</text>
-
-    <!-- Node 2.4 -->
-    <rect y="204" width="196" height="56" rx="8" fill="url(#grad-card)" stroke="#334155" stroke-width="1" filter="url(#card-shadow)"/>
-    <text x="14" y="228" fill="#F8FAFC" font-size="11" font-weight="600">Duration & MTTR Engine</text>
-    <text x="14" y="246" fill="#64748B" font-size="9.5">Cálculo de Tempo de Indisponibilidade</text>
-
-    <!-- Node 2.5 -->
-    <rect y="272" width="196" height="56" rx="8" fill="url(#grad-card)" stroke="#334155" stroke-width="1" filter="url(#card-shadow)"/>
-    <text x="14" y="296" fill="#F8FAFC" font-size="11" font-weight="600">Checklist Validator</text>
-    <text x="14" y="314" fill="#64748B" font-size="9.5">Percentual de Prontidão (0-100%)</text>
-  </g>
-
-  <!-- ==================== CAMADA 3: PERSISTENCE (INDEXEDDB) ==================== -->
-  <rect x="515" y="65" width="200" height="405" rx="12" fill="#0E1622" stroke="#1E2E42" stroke-width="1" />
-  <rect x="515" y="65" width="200" height="32" rx="12" fill="#142132" />
-  <rect x="515" y="85" width="200" height="12" fill="#142132" />
-  <text x="530" y="86" fill="#10B981" font-size="11" font-weight="700" letter-spacing="0.5">3. PERSISTENCE LAYER</text>
-
-  <!-- Nós Camada 3 -->
-  <g transform="translate(527, 110)">
-    <!-- Node 3.1 -->
-    <rect width="176" height="70" rx="8" fill="url(#grad-card)" stroke="#165B4C" stroke-width="1" filter="url(#card-shadow)"/>
-    <text x="12" y="24" fill="#34D399" font-size="11" font-weight="600">Dexie.js (IndexedDB)</text>
-    <text x="12" y="42" fill="#64748B" font-size="9.5">Banco Local Reativo</text>
-    <text x="12" y="58" fill="#94A3B8" font-size="9" font-family="monospace">NocIncidentDatabase v2</text>
-
-    <!-- Node 3.2 -->
-    <rect y="84" width="176" height="60" rx="8" fill="url(#grad-card)" stroke="#26384F" stroke-width="1" filter="url(#card-shadow)"/>
-    <text x="12" y="108" fill="#F8FAFC" font-size="10.5" font-weight="600">incidents Table</text>
-    <text x="12" y="126" fill="#64748B" font-size="9">Incidentes Ativos e Encerrados</text>
-
-    <!-- Node 3.3 -->
-    <rect y="158" width="176" height="60" rx="8" fill="url(#grad-card)" stroke="#26384F" stroke-width="1" filter="url(#card-shadow)"/>
-    <text x="12" y="182" fill="#F8FAFC" font-size="10.5" font-weight="600">timeline Table</text>
-    <text x="12" y="200" fill="#64748B" font-size="9">Snapshots Imutáveis de Avisos</text>
-
-    <!-- Node 3.4 -->
-    <rect y="232" width="176" height="60" rx="8" fill="url(#grad-card)" stroke="#26384F" stroke-width="1" filter="url(#card-shadow)"/>
-    <text x="12" y="256" fill="#F8FAFC" font-size="10.5" font-weight="600">settings Table</text>
-    <text x="12" y="274" fill="#64748B" font-size="9">Cidades Recentes, POPs, Operador</text>
-  </g>
-
-  <!-- ==================== CAMADA 4: INTEGRATION & OUTPUT ==================== -->
-  <rect x="740" y="65" width="215" height="405" rx="12" fill="#0E1622" stroke="#1E2E42" stroke-width="1" />
-  <rect x="740" y="65" width="215" height="32" rx="12" fill="#142132" />
-  <rect x="740" y="85" width="215" height="12" fill="#142132" />
-  <text x="755" y="86" fill="#F0A742" font-size="11" font-weight="700" letter-spacing="0.5">4. INTEGRATION LAYER</text>
-
-  <!-- Nós Camada 4 -->
-  <g transform="translate(752, 110)">
-    <!-- Node 4.1 -->
-    <rect width="191" height="74" rx="8" fill="url(#grad-card)" stroke="#D97706" stroke-width="1.2" filter="url(#card-shadow)"/>
-    <rect x="12" y="10" width="80" height="16" rx="4" fill="#F59E0B" fill-opacity="0.2"/>
-    <text x="17" y="22" fill="#FBBF24" font-size="8.5" font-weight="700" letter-spacing="0.5">CANAL OFICIAL</text>
-    <text x="12" y="44" fill="#F8FAFC" font-size="11" font-weight="700">Clipboard Dispatcher</text>
-    <text x="12" y="60" fill="#94A3B8" font-size="9">Ctrl+Enter · Operator-in-the-Loop</text>
-
-    <!-- Node 4.2 -->
-    <rect y="88" width="191" height="66" rx="8" fill="url(#grad-card)" stroke="#26384F" stroke-width="1" filter="url(#card-shadow)"/>
-    <text x="12" y="112" fill="#F8FAFC" font-size="11" font-weight="600">Spreadsheet TSV Exporter</text>
-    <text x="12" y="130" fill="#64748B" font-size="9">Linha Tabular Formatada para Excel</text>
-
-    <!-- Node 4.3 -->
-    <rect y="168" width="191" height="78" rx="8" fill="url(#grad-card)" stroke="#7C3AED" stroke-width="1" filter="url(#card-shadow)"/>
-    <rect x="12" y="178" width="90" height="16" rx="4" fill="#8B5CF6" fill-opacity="0.2"/>
-    <text x="17" y="190" fill="#C4B5FD" font-size="8.5" font-weight="700" letter-spacing="0.5">PLUG CORPORATIVO</text>
-    <text x="12" y="214" fill="#F8FAFC" font-size="11" font-weight="700">MondayBridgeAdapter</text>
-    <text x="12" y="230" fill="#94A3B8" font-size="9">Pronto para a API do Monday.com</text>
-  </g>
-
-  <!-- ==================== VETORES DE FLUXO / CONECTORES ==================== -->
-  <!-- UI -> Store -->
-  <path d="M 233 138 L 282 138" stroke="#35D1B8" stroke-width="1.8" fill="none" marker-end="url(#arrow-teal)"/>
-  <path d="M 233 330 L 282 148" stroke="#35D1B8" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
-  
-  <!-- Store -> DB -->
-  <path d="M 478 145 L 527 145" stroke="#A78BFA" stroke-width="1.8" fill="none" marker-end="url(#arrow-purple)"/>
-  
-  <!-- Store -> Notifier -->
-  <path d="M 478 138 C 500 138, 500 30, 752 145" stroke="#F0A742" stroke-width="1.8" fill="none" marker-end="url(#arrow-amber)"/>
-
-</svg>
-
-</div>
+</details>
 
 ---
 
